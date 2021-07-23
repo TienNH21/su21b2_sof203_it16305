@@ -8,8 +8,8 @@ import java.sql.PreparedStatement;
 
 public class DemoInsertStatement {
     public static void main(String[] args) {
-        // PH15665 - Vũ Anh Tuấn      -> nghỉ
-        // PH15099 - Mai Thành Vinh   -> nghỉ
+        // PH15099 - Mai Thành Vinh -> nghỉ
+        // Nguyễn Đức Huy
 
         User user = new User(0, "TienNH19", "123456", 2);
 

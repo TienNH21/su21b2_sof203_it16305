@@ -6,33 +6,34 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-public class DemoDelete {
+public class DemoDeleteUser {
     public static void main(String[] args) {
-        User user = new User(1004, "TienNH", "12345678", 1);
-
+        User u = new User(2002, "TienNH11", "123123", 1);
+        
         try {
             // B1: Load driver
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
-            // B2: Tạo kết nối
-            String dbUsername = "sa", dbPassword = "Aa@123456",
-                dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=jdbc_generic";
+            // B2: Tạo kết nỗi
+            String dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=jdbc_generic",
+                dbUsername = "sa", dbPassword = "Aa@123456";
 
             Connection conn = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
 
             // B3: Tạo PreparedStatement
             String query = "DELETE FROM users WHERE id = ?";
             PreparedStatement ps = conn.prepareStatement(query);
-            
-            ps.setInt(1, user.getId());
 
-            // B4 - B5: Thực thi truy vấn
-            int kq = ps.executeUpdate();
-            
-            System.out.println("Kết quả: " + kq);
+            ps.setInt(1, u.getId());
+
+            // B4: Truy vấn
+            // B5: Bóc dữ liệu
+            ps.executeUpdate();
 
             // B6: Đóng kết nối
             conn.close();
+
+            System.out.println("Xóa thành công");
         } catch (Exception e) {
             e.printStackTrace();
         }
