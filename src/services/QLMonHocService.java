@@ -8,21 +8,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
+import utils.JdbcUtil;
 
 public class QLMonHocService {
-    public List<MonHoc> getAll() {
+    public List<MonHoc> getAll(int chuyenNganhId) {
         List<MonHoc> ds = new ArrayList<>();
 
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            
-            String dbUser = "sa", dbPassword = "Aa@123456",
-                dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=quan_ly_mon_hoc";
-
-            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            
-            String query = "SELECT * FROM mon_hoc";
-            PreparedStatement ps = conn.prepareStatement(query);
+            String query = "SELECT * FROM mon_hoc WHERE chuyen_nganh_id = ?";
+            PreparedStatement ps = JdbcUtil.prepare(query);
+            ps.setInt(1, chuyenNganhId);
             
             ResultSet rs = ps.executeQuery();
             
@@ -31,9 +26,9 @@ public class QLMonHocService {
                 String tenMH = rs.getString("ten_mon_hoc");
                 String maMH = rs.getString("ma_mon_hoc");
                 Date ngayTao = rs.getDate("ngay_tao");
-                int chuyenNganhId = rs.getInt("chuyen_nganh_id");
+                int cnId = rs.getInt("chuyen_nganh_id");
                 
-                MonHoc mh = new MonHoc(id, maMH, tenMH, ngayTao, chuyenNganhId);
+                MonHoc mh = new MonHoc(id, maMH, tenMH, ngayTao, cnId);
                 
                 ds.add(mh);
             }
@@ -46,19 +41,9 @@ public class QLMonHocService {
     
     public MonHoc insert(MonHoc monHoc) {
         try {
-            // B1: Load driver
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-            // B2: Tạo Connection
-            String dbUser = "sa", dbPass = "Aa@123456",
-                dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=quan_ly_mon_hoc";
-
-            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
-            
-            // B3: Tạo PreparedStatement để thực thi truy vấn
             String query = "INSERT INTO mon_hoc(ten_mon_hoc, ma_mon_hoc, ngay_tao, chuyen_nganh_id) "
                 + " OUTPUT INSERTED.id VALUES(?, ?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(query);
+            PreparedStatement ps = JdbcUtil.prepare(query);
 
             ps.setString(1, monHoc.getTenMH());
             ps.setString(2, monHoc.getMaMH());
@@ -84,8 +69,6 @@ public class QLMonHocService {
             int id = rs.getInt(1);
             
             monHoc.setId(id);
-            
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,18 +77,31 @@ public class QLMonHocService {
     }
     
     public boolean update(MonHoc monHoc) {
+        try {
+            String query = "UPDATE mon_hoc SET ten_mon_hoc = ?, ma_mon_hoc = ?,"
+                    + " ngay_tao = ?, chuyen_nganh_id = ?"
+                    + " WHERE id = ?";
+            PreparedStatement ps = JdbcUtil.prepare(query);
+            
+            ps.setString(1, monHoc.getTenMH());
+            ps.setString(2, monHoc.getMaMH());
+            
+            java.sql.Date date = new java.sql.Date( monHoc.getNgayTao().getTime() );
+            ps.setDate(3, date);
+            ps.setInt(4, monHoc.getChuyenNganhId());
+            ps.setInt(5, monHoc.getId());
+            
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
     
     public boolean delete(String maMH) {
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            String dbUser = "sa", dbPass = "Aa@123456",
-                dbUrl = "jdbc:sqlserver://localhost:1433;databaseName=quan_ly_mon_hoc";
-
-            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass);
             String query = "DELETE FROM mon_hoc WHERE ma_mon_hoc = ?";
-            PreparedStatement ps = conn.prepareStatement(query);
+            PreparedStatement ps = JdbcUtil.prepare(query);
             ps.setString(1, maMH);
             ps.execute();
         } catch (Exception e) {
